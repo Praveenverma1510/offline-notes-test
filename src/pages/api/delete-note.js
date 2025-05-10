@@ -1,4 +1,5 @@
-
+import clientPromise from '../../../public/mongodb'
+import { ObjectId } from 'mongodb'
 export default async function handler(req, res) {
   if (req.method === 'DELETE') {
     try {
@@ -16,7 +17,12 @@ export default async function handler(req, res) {
 
       const noteFound = true; // Placeholder
 
-      if (noteFound) {
+      const client = await clientPromise;
+      const db = client.db('notes');
+      const collection = db.collection('notes');
+      const deleted = await collection.deleteOne({ _id: new ObjectId(id) })
+
+      if (deleted) {
         res.status(200).json({ message: 'Note deleted successfully' });
       } else {
         res.status(404).json({ error: 'Note not found' });

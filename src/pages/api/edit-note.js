@@ -1,4 +1,5 @@
-
+import clientPromise from '../../../public/mongodb'
+import { ObjectId } from 'mongodb'
 export default async function handler(req, res) {
   if (req.method === 'PUT') {
     try {
@@ -17,8 +18,16 @@ export default async function handler(req, res) {
       // - Replace the example response below.
 
       const noteFound = true; // Placeholder
+      const client = await clientPromise;
+      const db = client.db('notes');
+      const collection = db.collection('notes');
 
-      if (noteFound) {
+      const updated = await collection.updateOne(
+        { _id: new ObjectId(id) },
+        { $set: { noteData: noteTitle } }
+      )
+
+      if (updated) {
         res.status(200).json({ message: 'Note edited successfully' });
       } else {
         res.status(404).json({ error: 'Note not found' });

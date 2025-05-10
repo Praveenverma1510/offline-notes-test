@@ -1,3 +1,4 @@
+import clientPromise from '../../../public/mongodb'
 export default async function handler(req, res) {
   if (req.method === 'GET') {
     try {
@@ -8,8 +9,11 @@ export default async function handler(req, res) {
       // - Replace the example response below with the actual notes.
 
       const notes = []; // Example empty array
-
-      res.status(200).json(notes);
+      const client = await clientPromise;
+      const db = client.db('notes');
+      const collection = db.collection('notes');
+      const posts = await collection.find({}).toArray()
+      res.status(200).json(posts);
     } catch (error) {
       console.error('Error fetching notes:', error);
       res.status(500).json({ error: 'Failed to fetch notes' });

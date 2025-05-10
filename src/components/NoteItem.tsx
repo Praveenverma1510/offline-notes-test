@@ -1,146 +1,150 @@
 import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
-import SyncIndicator from './SyncIndicator'
-import { Note } from '../utils/notes'
+import SyncIndicator from './SyncIndicator';
+import { Note } from '../utils/notes';
 import { Button } from '../styles/styled';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faExclamationCircle } from '@fortawesome/free-solid-svg-icons';
 
 const NoteItemWrapper = styled.div`
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  &:hover {
+    transform: translateY(-4px);
+  }
 `;
 
 const NoteFrame = styled.li<{ isSubmitted?: boolean }>`
   position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: space-between;
-  padding: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  margin-bottom: 0.25rem;
-  max-height: 150px;
-  overflow-y: auto;
-  width: 500px;
-  word-wrap: break-word;
-  overflow: visible;
-  background-color: ${props => (!props.isSubmitted ? '#eee' : 'transparent')};
+  padding: 1.5rem;
+  border-radius: 16px;
+  background: ${props => props.isSubmitted 
+    ? 'rgba(255, 255, 255, 0.08)' 
+    : 'rgba(255, 245, 157, 0.15)'};
+  backdrop-filter: blur(16px);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.2),
+    inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: all 0.3s ease;
+  overflow: hidden;
 
-  .note-timestamp {
+  &:hover {
+    background: ${props => props.isSubmitted 
+      ? 'rgba(255, 255, 255, 0.12)' 
+      : 'rgba(255, 245, 157, 0.2)'};
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+  }
+
+  &::before {
+    content: '';
     position: absolute;
-    bottom: 0;
+    top: 0;
     left: 0;
-    margin: 0.5rem;
-    font-size: 0.8rem;
-    color: #888;
-  }
-
-  .edit-buttons {
-    position: absolute;
-    bottom: 0.5rem;
-    right: 0.5rem;
-    display: flex;
-    gap: 0.5rem;
-  }
-
-  .note-content {
-    width: 95%;
-    flex-grow: 1;
-    overflow-wrap: break-word;
-    word-wrap: break-word;
-    word-break: break-word;
-    overflow-y: auto;
-    max-width: 100%;
-    margin-bottom: 0.75rem;
-  }
-
-  textarea {
-    width: 100%;
-    border: none;
-    resize: none;
-    overflow: hidden;
-    font-size: 1rem;
-    line-height: 1;
-    padding: 0;
-    margin: 0;
-    height: auto;
-    min-height: 0rem;
+    width: 4px;
+    height: 100%;
+    background: ${props => props.isSubmitted 
+      ? 'linear-gradient(to bottom, #6366f1, #8b5cf6)' 
+      : 'linear-gradient(to bottom, #f59e0b, #f97316)'};
   }
 `;
 
-const Content = styled.div`
-  flex-grow: 1;
-  overflow-wrap: break-word;
-  word-wrap: break-word;
-  word-break: break-word;
-  overflow-y: auto;
-  max-width: 100%;
+const NoteTimestamp = styled.div`
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
   margin-bottom: 1rem;
-  padding-bottom: 0.25rem;
+  font-family: 'Inter', sans-serif;
+`;
+
+const NoteContent = styled.div`
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #ffffff;
+  margin-bottom: 1.5rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+`;
+
+const EditTextarea = styled.textarea`
+  width: 100%;
+  min-height: 100px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.2);
+  color: #ffffff;
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+  resize: none;
+  
+  &:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+  }
+`;
+
+const ButtonGroup = styled.div`
+  display: flex;
+  gap: 0.8rem;
+  margin-top: 1rem;
 `;
 
 const SaveButton = styled(Button)`
-  padding: 5px 10px;
-  font-size: 0.8rem;
+  background: linear-gradient(135deg, #10b981, #34d399);
+
+`;
+
+const EditButton = styled(Button)`
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
 `;
 
 const CancelButton = styled(Button)`
-  padding: 5px 10px;
-  font-size: 0.8rem;
+  background: linear-gradient(135deg, #6b7280, #4b5563);
 `;
 
 const DeleteButton = styled.button`
   position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  background: none;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(239, 68, 68, 0.2);
   border: none;
-  color: rgba(0, 0, 0, 0.4);
-  font-size: 1rem;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-`;
-
-const EditButton = styled(Button)`
-  position: absolute;
-  padding: 5px 10px;
-  bottom: 0.5rem;
-  right: 0.5rem;
-  font-size: 0.8rem;
-  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: rgba(239, 68, 68, 0.3);
+    transform: scale(1.1);
+  }
 `;
 
 const OfflineIndicatorWrapper = styled.div`
   display: flex;
-  flex-direction: column; /* Update to column */
-  align-items: flex-end; /* Align text elements to the right */
-  justify-content: flex-end; /* Align text elements to the bottom */
-  position: relative;
-  bottom: 0;
-  right: 0;
-  font-size: 0.75rem; /* Adjust the font size to make the icon smaller */
-  color: #fff;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
 `;
 
 const OfflineIndicator = styled.div`
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  margin-bottom: 0.25rem; /* Add margin-bottom for spacing between pairs */
-`;
-
-const OfflineIndicatorIcon = styled(FontAwesomeIcon)`
-  color: red;
-  margin-right: 0.25rem;
-`;
-
-const OfflineIndicatorText = styled.span`
+  gap: 0.5rem;
+  padding: 0.5rem 0.8rem;
+  background: rgba(239, 68, 68, 0.15);
+  border-radius: 8px;
   font-size: 0.8rem;
-  color: red;
+  color: #ef4444;
 `;
 
 interface NoteItemProps {
-  note: Note,
+  note: Note;
   onDeleteNote: (noteId: string) => Promise<void>;
   onEditNote: (noteId: string, updatedTitle: string) => Promise<void>;
 }
@@ -152,18 +156,14 @@ const NoteItem: React.FC<NoteItemProps> = ({ note, onDeleteNote, onEditNote }) =
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleDelete = async () => {
-    // Set syncing state to true before making the request
     setSyncing(true);
-
     try {
-      // Make the delete request to the server
       if (note.localId !== undefined) {
         await onDeleteNote(note.localId);
       }
     } catch (error) {
       console.error('Error deleting note:', error);
     } finally {
-      // Set syncing state back to false after the request is complete
       setSyncing(false);
     }
   };
@@ -191,55 +191,68 @@ const NoteItem: React.FC<NoteItemProps> = ({ note, onDeleteNote, onEditNote }) =
     if (isEditing && textareaRef.current) {
       textareaRef.current.style.height = 'auto';
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-      textareaRef.current.value = note.title;
     }
   }, [isEditing, title]);
 
   return (
     <NoteItemWrapper>
       <NoteFrame isSubmitted={note._id !== undefined}>
-        {isSyncing && <SyncIndicator/>}
-        <DeleteButton onClick={handleDelete}>[x]</DeleteButton>
-        <p className="note-timestamp">{new Date(note.createdAt).toUTCString()}</p>
-        <div className="note-content">
-          {isEditing ? (
-            <textarea
-              ref={textareaRef}
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              autoFocus
-            />
-          ) : (
-            <Content>{note.title}</Content>
-          )}
-        </div>
+        {isSyncing && <SyncIndicator />}
+        <DeleteButton onClick={handleDelete}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" fill="#ef4444"/>
+          </svg>
+        </DeleteButton>
+        
+        <NoteTimestamp>
+          {new Date(note.createdAt).toLocaleString()}
+        </NoteTimestamp>
+        
         {isEditing ? (
-          <div className="edit-buttons">
+          <EditTextarea
+            ref={textareaRef}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            autoFocus
+          />
+        ) : (
+          <NoteContent>{note.title}</NoteContent>
+        )}
+        
+        {isEditing ? (
+          <ButtonGroup>
             <SaveButton onClick={handleSave}>Save</SaveButton>
             <CancelButton onClick={handleCancel}>Cancel</CancelButton>
-          </div>
+          </ButtonGroup>
         ) : (
           <EditButton onClick={handleEdit}>Edit</EditButton>
         )}
       </NoteFrame>
+      
       {(note.localDeleteSynced === false || note.localEditSynced === false || note._id === undefined) && (
         <OfflineIndicatorWrapper>
           {note.localDeleteSynced === false && (
             <OfflineIndicator>
-              <OfflineIndicatorIcon icon={faExclamationCircle} />
-              <OfflineIndicatorText>Note deletion not synced</OfflineIndicatorText>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="#ef4444"/>
+              </svg>
+              <span>Note deletion pending sync</span>
             </OfflineIndicator>
           )}
           {note.localEditSynced === false && (
             <OfflineIndicator>
-              <OfflineIndicatorIcon icon={faExclamationCircle} />
-              <OfflineIndicatorText>Note edit not synced</OfflineIndicatorText>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="#ef4444"/>
+              </svg>
+              <span>Note edit pending sync</span>
             </OfflineIndicator>
           )}
           {note._id === undefined && (
             <OfflineIndicator>
-              <OfflineIndicatorIcon icon={faExclamationCircle} />
-              <OfflineIndicatorText>Note submission not synced</OfflineIndicatorText>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="#ef4444"/>
+              </svg>
+              <span>Note creation pending sync</span>
             </OfflineIndicator>
           )}
         </OfflineIndicatorWrapper>
