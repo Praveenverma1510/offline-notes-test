@@ -3,7 +3,7 @@ import { MongoClient } from 'mongodb'
 const uri = process.env.MONGODB_URI
 const options = {
   tls: true,
-  tlsAllowInvalidCertificates: false, // Only for testing, not production
+  tlsAllowInvalidCertificates: false,
   retryWrites: true,
   retryReads: true
 }
