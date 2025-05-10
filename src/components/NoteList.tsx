@@ -139,9 +139,11 @@ export default function NoteList() {
   const [filterStatus, setFilterStatus] = useState<'all' | 'synced' | 'unsynced'>('all');
 
   const handleNoteSubmit = useCallback(async (noteTitle: string) => {
-    const note: Note = createNote(noteTitle);
-    await submitNote(note);
-    setAllNotes(await getNotes());
+    if (noteTitle != '') {
+      const note: Note = createNote(noteTitle);
+      await submitNote(note);
+      setAllNotes(await getNotes());
+    }
   }, []);
 
   const handleNoteDelete = useCallback(async (noteId: string) => {
@@ -150,6 +152,7 @@ export default function NoteList() {
   }, []);
 
   const handleEditNote = useCallback(async (noteId: string, updatedTitle: string) => {
+    console.log("EDITING BUTTON CALLED APIII")
     await editNote(noteId, updatedTitle);
     setAllNotes(await getNotes());
   }, []);
@@ -159,6 +162,7 @@ export default function NoteList() {
     try {
       await refreshNotes();
       const notes = await getNotes();
+      console.log('Fetched notes:', notes);
       setAllNotes(notes);
       setFilteredNotes(notes);
     } catch (error) {
@@ -216,9 +220,9 @@ export default function NoteList() {
     if (filterStatus === 'synced') {
       result = result.filter(note => note._id !== undefined);
     } else if (filterStatus === 'unsynced') {
-      result = result.filter(note => note._id === undefined || 
-               note.localDeleteSynced === false || 
-               note.localEditSynced === false);
+      result = result.filter(note => note._id === undefined ||
+        note.localDeleteSynced === false ||
+        note.localEditSynced === false);
     }
     
     setFilteredNotes(result);
@@ -239,34 +243,34 @@ export default function NoteList() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <FilterSelect
+          {/* <FilterSelect
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value as 'all' | 'synced' | 'unsynced')}
           >
             <option value="all">All Notes</option>
             <option value="synced">Synced</option>
             <option value="unsynced">Unsynced</option>
-          </FilterSelect>
+          </FilterSelect> */}
         </FilterContainer>
-        
-        
-        {!loading ? (
+
+
+        {loading ? (
           <LoadingSpinner />
         ) : (
           <NotesList>
             {filteredNotes.length > 0 ? (
               filteredNotes.map((note, index) => (
-                <NoteItem 
-                  key={index} 
-                  note={note} 
-                  onDeleteNote={handleNoteDelete} 
-                  onEditNote={handleEditNote} 
+                <NoteItem
+                  key={index}
+                  note={note}
+                  onDeleteNote={handleNoteDelete}
+                  onEditNote={handleEditNote}
                 />
               ))
             ) : (
               <EmptyState>
-                {searchTerm || filterStatus !== 'all' 
-                  ? "No notes match your filters" 
+                {searchTerm || filterStatus !== 'all'
+                  ? "No notes match your filters"
                   : "No notes yet. Add one above!"}
               </EmptyState>
             )}

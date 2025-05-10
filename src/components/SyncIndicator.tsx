@@ -1,42 +1,67 @@
 import styled, { keyframes } from 'styled-components';
 
 const spinAnimation = keyframes`
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+    stroke-dashoffset: 60;
+  }
+  50% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    transform: rotate(360deg);
+    stroke-dashoffset: -60;
+  }
 `;
 
 const pulseAnimation = keyframes`
-  0% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.1); opacity: 0.8; }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(99, 102, 241, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
+  }
 `;
 
 const SyncIndicatorContainer = styled.div`
   position: absolute;
   top: 1rem;
   right: 1rem;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: linear-gradient(135deg, #6366f1, #8b5cf6);
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 2px 10px rgba(99, 102, 241, 0.3);
   animation: ${pulseAnimation} 1.5s ease-in-out infinite;
 `;
 
-const SyncIcon = styled.svg`
-  width: 14px;
-  height: 14px;
-  animation: ${spinAnimation} 1.2s linear infinite;
+const SyncCircle = styled.svg`
+  width: 20px;
+  height: 20px;
+  transform-origin: center;
+  
+  circle {
+    fill: none;
+    stroke: white;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-dasharray: 60;
+    animation: ${spinAnimation} 1.5s cubic-bezier(0.4, 0.1, 0.4, 1) infinite;
+  }
 `;
 
 const SyncIndicator = () => {
   return (
     <SyncIndicatorContainer>
-      <SyncIcon viewBox="0 0 24 24" fill="none">
-        <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v2z" fill="#ffffff"/>
-      </SyncIcon>
+      <SyncCircle viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10" />
+      </SyncCircle>
     </SyncIndicatorContainer>
   );
 };

@@ -23,8 +23,17 @@ export default async function handler(req, res) {
 
     
       // const insertedId = noteData.localId; // Placeholder: Use localId as temporary example ID
-      const newPost = await collection.insertOne({ noteData: noteData.title })
-      res.status(201).json({id:newPost.insertedId})
+      const newPost = await collection.insertOne({ 
+        title: noteData.title,
+        // noteData: noteData.noteData || "",
+        // localId: noteData.localId,
+        createdAt: new Date(noteData.createdAt),
+        updatedAt: new Date()
+      })
+      res.status(201).json({
+        id: newPost.insertedId,
+        // localId: noteData.localId
+      })
 
       // Respond with the identifier the client expects
       // res.status(200).json({ insertedId: insertedId });

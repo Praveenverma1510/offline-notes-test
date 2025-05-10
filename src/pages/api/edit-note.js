@@ -22,15 +22,36 @@ export default async function handler(req, res) {
       const db = client.db('notes');
       const collection = db.collection('notes');
 
-      const updated = await collection.updateOne(
-        { _id: new ObjectId(id) },
-        { $set: { noteData: noteTitle } }
-      )
+      const existingNote = await collection.findOne({ _id: new ObjectId(id) });
 
-      if (updated) {
-        res.status(200).json({ message: 'Note edited successfully' });
+      if (existingNote) {
+        const updated = await collection.updateOne(
+          { _id: new ObjectId(id) },
+          { 
+            $set: { 
+              title: noteTitle, 
+              updatedAt: new Date() 
+            }
+          }
+        );
+
+        if (updated.matchedCount > 0) {
+          res.status(200).json({ message: 'Note edited successfully' });
+        } else {
+          res.status(404).json({ error: 'Note not found' });
+        }
       } else {
-        res.status(404).json({ error: 'Note not found' });
+        const newNote = await collection.insertOne({
+          title: noteTitle,
+          // noteData: noteTitle || "",
+          createdAt: new Date(), // This will be the timestamp of the new note
+          updatedAt: new Date()  // Same timestamp for initial update
+        });
+
+        res.status(201).json({
+          message: 'New note created successfully',
+          id: newNote.insertedId
+        });
       }
     } catch (error) {
       console.error('Error editing note:', error);

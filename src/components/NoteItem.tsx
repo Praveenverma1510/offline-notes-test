@@ -17,8 +17,8 @@ const NoteFrame = styled.li<{ isSubmitted?: boolean }>`
   position: relative;
   padding: 1.5rem;
   border-radius: 16px;
-  background: ${props => props.isSubmitted 
-    ? 'rgba(255, 255, 255, 0.08)' 
+  background: ${props => props.isSubmitted
+    ? 'rgba(255, 255, 255, 0.08)'
     : 'rgba(255, 245, 157, 0.15)'};
   backdrop-filter: blur(16px);
   box-shadow: 
@@ -29,9 +29,9 @@ const NoteFrame = styled.li<{ isSubmitted?: boolean }>`
   overflow: hidden;
 
   &:hover {
-    background: ${props => props.isSubmitted 
-      ? 'rgba(255, 255, 255, 0.12)' 
-      : 'rgba(255, 245, 157, 0.2)'};
+    background: ${props => props.isSubmitted
+    ? 'rgba(255, 255, 255, 0.12)'
+    : 'rgba(255, 245, 157, 0.2)'};
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
   }
 
@@ -42,9 +42,9 @@ const NoteFrame = styled.li<{ isSubmitted?: boolean }>`
     left: 0;
     width: 4px;
     height: 100%;
-    background: ${props => props.isSubmitted 
-      ? 'linear-gradient(to bottom, #6366f1, #8b5cf6)' 
-      : 'linear-gradient(to bottom, #f59e0b, #f97316)'};
+    background: ${props => props.isSubmitted
+    ? 'linear-gradient(to bottom, #6366f1, #8b5cf6)'
+    : 'linear-gradient(to bottom, #f59e0b, #f97316)'};
   }
 `;
 
@@ -158,8 +158,8 @@ const NoteItem: React.FC<NoteItemProps> = ({ note, onDeleteNote, onEditNote }) =
   const handleDelete = async () => {
     setSyncing(true);
     try {
-      if (note.localId !== undefined) {
-        await onDeleteNote(note.localId);
+      if (note._id !== undefined) {
+        await onDeleteNote(note._id);
       }
     } catch (error) {
       console.error('Error deleting note:', error);
@@ -174,9 +174,10 @@ const NoteItem: React.FC<NoteItemProps> = ({ note, onDeleteNote, onEditNote }) =
   };
 
   const handleSave = async () => {
-    if (note.localId !== undefined) {
+    console.log('Saving note:', note, title);
+    if (note._id !== undefined) {
       setSyncing(true);
-      await onEditNote(note.localId, title);
+      await onEditNote(note._id, title);
       setSyncing(false);
       setIsEditing(false);
     }
@@ -200,12 +201,12 @@ const NoteItem: React.FC<NoteItemProps> = ({ note, onDeleteNote, onEditNote }) =
         {isSyncing && <SyncIndicator />}
         <DeleteButton onClick={handleDelete}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" fill="#ef4444"/>
+            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" fill="#ef4444" />
           </svg>
         </DeleteButton>
         
         <NoteTimestamp>
-          {new Date(note.createdAt).toLocaleString()}
+          {new Date(note?.createdAt).toLocaleString()}
         </NoteTimestamp>
         
         {isEditing ? (
@@ -234,7 +235,7 @@ const NoteItem: React.FC<NoteItemProps> = ({ note, onDeleteNote, onEditNote }) =
           {note.localDeleteSynced === false && (
             <OfflineIndicator>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="#ef4444"/>
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="#ef4444" />
               </svg>
               <span>Note deletion pending sync</span>
             </OfflineIndicator>
@@ -242,7 +243,7 @@ const NoteItem: React.FC<NoteItemProps> = ({ note, onDeleteNote, onEditNote }) =
           {note.localEditSynced === false && (
             <OfflineIndicator>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="#ef4444"/>
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="#ef4444" />
               </svg>
               <span>Note edit pending sync</span>
             </OfflineIndicator>
@@ -250,7 +251,7 @@ const NoteItem: React.FC<NoteItemProps> = ({ note, onDeleteNote, onEditNote }) =
           {note._id === undefined && (
             <OfflineIndicator>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="#ef4444"/>
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="#ef4444" />
               </svg>
               <span>Note creation pending sync</span>
             </OfflineIndicator>
